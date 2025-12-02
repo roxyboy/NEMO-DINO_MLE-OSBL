@@ -81,6 +81,8 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in) ::   kt            ! ocean time step
       ! INTEGER, INTENT(in) ::   Nbb           ! time index
+      REAL(wp), DIMENSION(A2D(nn_hls)) :: Hu, Hv, Db_u, Db_v
+      REAL(wp), DIMENSION(A2D(nn_hls)) :: e1u, e2v
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
