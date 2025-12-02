@@ -20,8 +20,9 @@ MODULE tramle
    USE lib_mpp        ! MPP library
    USE lbclnk         ! lateral boundary condition / mpp link
    !
-   USE infmod         ! external exchanges
-   USE inffld
+   ! USE infmod         ! deprecated
+   ! USE inffld
+   USE pyfld
 
    ! where OSMOSIS_OBL is used with integrated FK
    USE zdf_oce, ONLY : ln_zdfosm
@@ -225,7 +226,7 @@ CONTAINS
             END_2D
          ENDIF
          !                                      !==  External computation of MLE stream function ==!
-         CALL inferences( kt , 0, 0, 0, zhu, zhv, dbu, dbv )
+         CALL inputs_mle_c20( kt , zhu, zhv, dbu, dbv )
          zpsim_u(:,:) = ext_psiu(:,:) * e2u(:,:)    ! replace external stream function with e2u / e1v required for "transport"
          zpsim_v(:,:) = ext_psiv(:,:) * e1v(:,:)
          !

@@ -70,7 +70,7 @@ CONTAINS
    END SUBROUTINE finalize_python_fields
 
 
-   SUBROUTINE inputs_mle_c20( kt, Nbb )
+   SUBROUTINE inputs_mle_c20( kt )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inputs_MLE.C20  ***
       !!
@@ -80,14 +80,14 @@ CONTAINS
       !!                *
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in) ::   kt            ! ocean time step
-      INTEGER, INTENT(in) ::   Nbb           ! time index
+      ! INTEGER, INTENT(in) ::   Nbb           ! time index
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
-      CALL send_to_python( 'Hu', Hu(:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'Hv', Hv(:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'Db_u', Db_u(:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'Db_v', Db_v(:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'Hu', Hu(:,:), kt )    ! Send fields to Python models
+      CALL send_to_python( 'Hv', Hv(:,:), kt )    ! Send fields to Python models
+      CALL send_to_python( 'Db_u', Db_u(:,:), kt )    ! Send fields to Python models
+      CALL send_to_python( 'Db_v', Db_v(:,:), kt )    ! Send fields to Python models
       CALL send_to_python( 'e1u', e1u, kt )    ! Send fields to Python models
       CALL send_to_python( 'e2v', e2v, kt )    ! Send fields to Python models
       !
@@ -117,7 +117,7 @@ CONTAINS
       ! Outputs results
       CALL iom_put( 'ext_psiu_mle', ext_psiu )
       CALL iom_put( 'ext_psiv_mle', ext_psiv )
-     !
+      !
    END SUBROUTINE update_from_mle_c20
 
 END MODULE pyfld
