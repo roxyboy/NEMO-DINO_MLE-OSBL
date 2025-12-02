@@ -70,7 +70,7 @@ CONTAINS
    END SUBROUTINE finalize_python_fields
 
 
-   SUBROUTINE inputs_mle_c20( kt )
+   SUBROUTINE inputs_mle_c20( kt, Hu, Hv, Db_u, Db_v )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inputs_MLE.C20  ***
       !!
@@ -81,15 +81,15 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in) ::   kt            ! ocean time step
       ! INTEGER, INTENT(in) ::   Nbb           ! time index
-      REAL(wp), DIMENSION(A2D(nn_hls)) :: Hu, Hv, Db_u, Db_v
-      REAL(wp), DIMENSION(A2D(nn_hls)) :: e1u, e2v
+      REAL(wp), DIMENSION(jpi,jpj) :: Hu, Hv, Db_u, Db_v
+      REAL(wp), DIMENSION(jpi,jpj) :: e1u, e2v
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
-      CALL send_to_python( 'Hu', Hu(:,:), kt )    ! Send fields to Python models
-      CALL send_to_python( 'Hv', Hv(:,:), kt )    ! Send fields to Python models
-      CALL send_to_python( 'Db_u', Db_u(:,:), kt )    ! Send fields to Python models
-      CALL send_to_python( 'Db_v', Db_v(:,:), kt )    ! Send fields to Python models
+      CALL send_to_python( 'Hu', Hu, kt )    ! Send fields to Python models
+      CALL send_to_python( 'Hv', Hv, kt )    ! Send fields to Python models
+      CALL send_to_python( 'Db_u', Db_u, kt )    ! Send fields to Python models
+      CALL send_to_python( 'Db_v', Db_v, kt )    ! Send fields to Python models
       CALL send_to_python( 'e1u', e1u, kt )    ! Send fields to Python models
       CALL send_to_python( 'e2v', e2v, kt )    ! Send fields to Python models
       !
