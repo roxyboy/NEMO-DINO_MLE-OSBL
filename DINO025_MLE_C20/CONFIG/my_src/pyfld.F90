@@ -93,7 +93,7 @@ CONTAINS
       !
    END SUBROUTINE inputs_mle_c20
 
-   SUBROUTINE update_from_mle_c20( kt, Nrhs )
+   SUBROUTINE update_from_mle_c20( kt )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE update_from_MLE.C20  ***
       !!
