@@ -93,9 +93,15 @@ CONTAINS
       CALL send_to_python( 'e1u', e1u, kt )    ! Send fields to Python models
       CALL send_to_python( 'e2v', e2v, kt )    ! Send fields to Python models
       !
+      CALL receive_from_python( 'psi_u', ext_psiu, kt )
+      CALL receive_from_python( 'psi_v', ext_psiv, kt )
+      !
+      CALL iom_put( 'ext_psiu_mle', ext_psiu )
+      CALL iom_put( 'ext_psiv_mle', ext_psiv )
+      !
    END SUBROUTINE inputs_mle_c20
 
-   SUBROUTINE update_from_mle_c20( kt )
+   ! SUBROUTINE update_from_mle_c20( kt )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE update_from_MLE.C20  ***
       !!
@@ -104,22 +110,22 @@ CONTAINS
       !! ** Method  :   *
       !!                *
       !!----------------------------------------------------------------------
-      INTEGER, INTENT(in) ::   kt            ! ocean time step
+      ! INTEGER, INTENT(in) ::   kt            ! ocean time step
       ! INTEGER, INTENT(in) ::   Nrhs          ! time index
       !!----------------------------------------------------------------------
       !
       ! Proceed receptions
-      CALL receive_from_python( 'psi_u', ext_psiu, kt )
-      CALL receive_from_python( 'psi_v', ext_psiv, kt )
+      ! CALL receive_from_python( 'psi_u', ext_psiu, kt )
+      ! CALL receive_from_python( 'psi_v', ext_psiv, kt )
       !
       ! update ocean
       ! uu(:,:,:,Nrhs) = uu(:,:,:,Nrhs) + ext_uf(:,:,:)
       ! vv(:,:,:,Nrhs) = vv(:,:,:,Nrhs) + ext_vf(:,:,:)
       !
       ! Outputs results
-      CALL iom_put( 'ext_psiu_mle', ext_psiu )
-      CALL iom_put( 'ext_psiv_mle', ext_psiv )
+      ! CALL iom_put( 'ext_psiu_mle', ext_psiu )
+      ! CALL iom_put( 'ext_psiv_mle', ext_psiv )
       !
-   END SUBROUTINE update_from_mle_c20
+   ! END SUBROUTINE update_from_mle_c20
 
 END MODULE pyfld
