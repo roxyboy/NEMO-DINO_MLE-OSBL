@@ -19,7 +19,7 @@
 !-----------------------------------------------------------------------
 &namusr_def    !   User defined :   BASIN configuration
 !-----------------------------------------------------------------------
-   rn_e1_deg        =      1.  ! Resolution in degrees of longitude (Mercator grid)
+   rn_e1_deg        =      0.25  ! Resolution in degrees of longitude (Mercator grid)
    rn_phi_min       =    -70.    ! Latitude of the south frontier (T point) [degrees] (approximative)
    rn_phi_max       =     70.    ! Latitude of the north frontier (T point) [degrees] (approximative)
    rn_lam_min       =      0.    ! Longitude of the west frontier (T point) [degrees] (approximative)
@@ -105,8 +105,8 @@
 !-----------------------------------------------------------------------
    ln_linssh   = .false.    !  =T  linear free surface  ==>>  model level are fixed in time
    !
-   rn_Dt      = 2700. !  time step for the dynamics (2700. = 45 min, 1 degree)
-   !rn_Dt      = 900.  !  time step for the dynamics (900. = 15 min, 1/4 degree)
+   !rn_Dt      = 2700. !  time step for the dynamics (2700. = 45 min, 1 degree)
+   rn_Dt      = 900.  !  time step for the dynamics (900. = 15 min, 1/4 degree)
    !
    ln_meshmask = .true.   !  =T create a mesh file
 /
