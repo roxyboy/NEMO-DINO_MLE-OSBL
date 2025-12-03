@@ -13,14 +13,14 @@ def ocean_info():
     # coupling config
     tunnel_config = list()
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
-                            'grids' : { 'eORCA025' : {'npts' : (1440,1206)} }, \
-                            'exchs' : [ {'freq' : 900, 'grd' : 'eORCA025', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v'], 'out' : ['psi_u','psi_v']} ] }
+                            'grids' : { 'DINO_Grid' : {'npts' : (248,796), 'halos' : 7, 'bnd' : ('close','close') }  }, \
+                            'exchs' : [ {'freq' : 900., 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v'], 'out' : ['psi_u','psi_v']} ] }
                         )
                         
     # static coupling (manual send/receive)
     tunnel_config.append( { 'label' : 'TO_NEMO_METRICS', \
-                            'grids' : { 'eORCA025' : {'npts' : (1440,1206)} }, \
-                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'eORCA025', 'lvl' : 1, 'in' : ['e1u','e2v'], 'out' : []} ] }
+                            'grids' : { 'DINO_Grid' : {'npts' : (248,796), 'halos' : 7, 'bnd' : ('close','close') }  }, \
+                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['e1u','e2v'], 'out' : []} ] }
                         )
                         
     return tunnel_config, nemo_nml
