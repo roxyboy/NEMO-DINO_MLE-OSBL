@@ -23,7 +23,7 @@ MODULE pyfld
    !!----------------------------------------------------------------------
    !!                    2D Python coupling Module fields
    !!----------------------------------------------------------------------
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:)  :: ext_psiu, ext_psiv    !: dummy field to store 2D fields
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:)  :: ext_psiu_mle, ext_psiv_mle    !: dummy field to store 2D fields
 
    !!----------------------------------------------------------------------
    !!                    3D Python coupling Module fields
@@ -43,7 +43,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
       ! Allocate fields
-      ALLOCATE( ext_psiu(jpi,jpj) , ext_psiv(jpi,jpj) )
+      ALLOCATE( ext_psiu_mle(jpi,jpj) , ext_psiv_mle(jpi,jpj) )
       !
       ! configure coupling
       CALL init_python_coupling()
@@ -62,7 +62,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
       ! Free memory
-      DEALLOCATE( ext_psiu, ext_psiv )
+      DEALLOCATE( ext_psiu_mle, ext_psiv_mle )
       !
       ! terminate coupling environment
       CALL finalize_python_coupling()
@@ -93,11 +93,11 @@ CONTAINS
       CALL send_to_python( 'e1u', e1u, kt )    ! Send fields to Python models
       CALL send_to_python( 'e2v', e2v, kt )    ! Send fields to Python models
       !
-      CALL receive_from_python( 'psi_u', ext_psiu, kt )
-      CALL receive_from_python( 'psi_v', ext_psiv, kt )
+      CALL receive_from_python( 'psi_u', ext_psiu_mle, kt )
+      CALL receive_from_python( 'psi_v', ext_psiv_mle, kt )
       !
-      CALL iom_put( 'ext_psiu_mle', ext_psiu )
-      CALL iom_put( 'ext_psiv_mle', ext_psiv )
+      CALL iom_put( 'ext_psiu_mle', ext_psiu_mle )
+      CALL iom_put( 'ext_psiv_mle', ext_psiv_mle )
       !
    END SUBROUTINE inputs_mle_c20
 
