@@ -226,7 +226,7 @@ CONTAINS
             END_2D
          ENDIF
          !                                      !==  External computation of MLE stream function ==!
-         CALL inputs_mle_c20( kt, zhu, zhv, dbu, dbv )
+         CALL update_from_mle_c20( kt, zhu, zhv, dbu, dbv )
          zpsim_u(:,:) = ext_psiu_mle(:,:) * e2u(:,:)    ! replace external stream function with e2u / e1v required for "transport"
          zpsim_v(:,:) = ext_psiv_mle(:,:) * e1v(:,:)
          !
