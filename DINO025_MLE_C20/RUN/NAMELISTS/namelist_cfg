@@ -19,7 +19,7 @@
 !-----------------------------------------------------------------------
 &namusr_def    !   User defined :   BASIN configuration
 !-----------------------------------------------------------------------
-   rn_e1_deg        =      1.  ! Resolution in degrees of longitude (Mercator grid)
+   rn_e1_deg        =      0.25  ! Resolution in degrees of longitude (Mercator grid)
    rn_phi_min       =    -70.    ! Latitude of the south frontier (T point) [degrees] (approximative)
    rn_phi_max       =     70.    ! Latitude of the north frontier (T point) [degrees] (approximative)
    rn_lam_min       =      0.    ! Longitude of the west frontier (T point) [degrees] (approximative)
@@ -84,7 +84,7 @@
    nn_no       =       0      !  job number (no more used...)
    cn_exp      = 'NEVERWORLD' !  experience name
    nn_it000    =       1      !  first time step
-   nn_itend    =       35040 ! 58500  last time step (32 it => 1 day, 11520 => 1 year)
+   nn_itend    =       34560 ! 58500  last time step (32 it => 1 day, 11520 => 1 year)
    nn_istate   =       1      !  output the initial state (1) or not (0)
    ! nn_stock    =      11520   !  frequency of creation of a restart file (modulo referenced to 1) 50 years
    ! nn_write    =      11520   !  frequency of write in the output file   (modulo referenced to nn_it000)
@@ -105,8 +105,8 @@
 !-----------------------------------------------------------------------
    ln_linssh   = .false.    !  =T  linear free surface  ==>>  model level are fixed in time
    !
-   rn_Dt      = 2700. !  time step for the dynamics (2700. = 45 min, 1 degree)
-   !rn_Dt      = 900.  !  time step for the dynamics (900. = 15 min, 1/4 degree)
+   !rn_Dt      = 2700. !  time step for the dynamics (2700. = 45 min, 1 degree)
+   rn_Dt      = 900.  !  time step for the dynamics (900. = 15 min, 1/4 degree)
    !
    ln_meshmask = .true.   !  =T create a mesh file
 /
