@@ -9,7 +9,6 @@
 
       <variable_definition>
           
-	  <variable id="buffer_size" type="int">25000000</variable>
           <variable id="info_level"                type="int">10</variable>
           <variable id="using_server"              type="bool">false</variable>
           <variable id="using_oasis"               type="bool">true</variable>
