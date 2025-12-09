@@ -14,7 +14,7 @@ def ocean_info():
     tunnel_config = list()
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
                             'grids' : { 'DINO_Grid' : {'npts' : (62,199), 'halos' : 7, 'bnd' : ('close','close') }  }, \
-                            'exchs' : [ {'freq' : 900., 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v'], 'out' : ['psi_u','psi_v']} ] }
+                            'exchs' : [ {'freq' : 2700., 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v'], 'out' : ['psi_u','psi_v']} ] }
                         )
                         
     # static coupling (manual send/receive)
