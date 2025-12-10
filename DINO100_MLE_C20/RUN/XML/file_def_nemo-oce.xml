@@ -9,7 +9,7 @@
     
     <file_definition type="one_file" name="@expname@.@freq@_" sync_freq="5d" min_digits="4">
 
-      <file_group id="5d" output_freq="5d" split_freq="5d" output_level="10" enabled=".TRUE." buffer_size="25000000">  <!-- 5d files -->  
+      <file_group id="5d" output_freq="5d" split_freq="5d" output_level="10" enabled=".TRUE.">  <!-- 5d files -->  
 	      
 	<file id="file001" name_suffix="gridTsurf" description="ocean T grid variables" >
 	  <field field_ref="sst"           name="sosstsst" standard_name="Sea Surface Conservative temperature" />
@@ -39,7 +39,7 @@
 
       </file_group>
 
-      <file_group id="30d" output_freq="30d" split_freq="30d" output_level="10" enabled=".TRUE." buffer_size="25000000">  <!-- 30d files -->  
+      <file_group id="30d" output_freq="30d" split_freq="30d" output_level="10" enabled=".TRUE.">  <!-- 30d files -->  
  
 	<file id="file011" name_suffix="gridT" description="ocean T grid variables" >
 	  <field field_ref="toce"          name="votemper"  />
