@@ -80,9 +80,7 @@ CONTAINS
       !!                *
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in) ::   kt            ! ocean time step
-      ! INTEGER, INTENT(in) ::   Nbb           ! time index
       REAL(wp), DIMENSION(jpi,jpj) :: Hu, Hv, Db_u, Db_v
-      REAL(wp), DIMENSION(jpi,jpj) :: e1u, e2v
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
@@ -90,8 +88,6 @@ CONTAINS
       CALL send_to_python( 'Hv', Hv, kt )    ! Send fields to Python models
       CALL send_to_python( 'Db_u', Db_u, kt )    ! Send fields to Python models
       CALL send_to_python( 'Db_v', Db_v, kt )    ! Send fields to Python models
-      CALL send_to_python( 'e1u', e1u, kt )    ! Send fields to Python models
-      CALL send_to_python( 'e2v', e2v, kt )    ! Send fields to Python models
       !
       CALL receive_from_python( 'psi_u', ext_psiu_mle, kt )
       CALL receive_from_python( 'psi_v', ext_psiv_mle, kt )
