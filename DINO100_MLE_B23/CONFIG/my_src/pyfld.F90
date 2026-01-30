@@ -70,7 +70,7 @@ CONTAINS
    END SUBROUTINE finalize_python_fields
 
 
-   SUBROUTINE update_from_mle_c20( kt, bldu, bldv, Hu, Hv, Db_u, Db_v, Ustar2, Fbuoy )
+   SUBROUTINE update_from_mle_b23( kt, bldu, bldv, Hu, Hv, Db_u, Db_v, Ustar2, Fbuoy )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inputs_MLE.C20  ***
       !!
@@ -100,7 +100,7 @@ CONTAINS
       CALL iom_put( 'ext_psiu_mle', ext_psiu_mle )
       CALL iom_put( 'ext_psiv_mle', ext_psiv_mle )
       !
-   END SUBROUTINE update_from_mle_c20
+   END SUBROUTINE update_from_mle_b23
 
    ! SUBROUTINE update_from_mle_c20( kt )
       !!----------------------------------------------------------------------
