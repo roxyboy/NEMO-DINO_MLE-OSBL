@@ -15,6 +15,8 @@ MODULE tramle
    USE phycst         ! physical constant
    USE zdfmxl         ! mixed layer depth
    !
+   USE sbc_oce, ONLY  : taum        ! surface boundary condition: ocean
+   !
    USE in_out_manager ! I/O manager
    USE iom            ! IOM library
    USE lib_mpp        ! MPP library
@@ -26,8 +28,9 @@ MODULE tramle
 
    ! where OSMOSIS_OBL is used with integrated FK
    USE zdf_oce, ONLY : ln_zdfosm
-   USE zdfosm, ONLY  : ln_osm_mle, hbl, hmle, dbdx_mle, dbdy_mle, mld_prof, swb0
-   USE zdfgls, ONLY  : ustar2_surf
+   USE zdfosm, ONLY  : ln_osm_mle, hmle, dbdx_mle, dbdy_mle, mld_prof, swb0
+   !USE zdfgls, ONLY  : ustar2_surf
+   USE zdftke, ONLY  : p_sh2, p_avt, rn2, p_avm, dissl, en
 
    IMPLICIT NONE
    PRIVATE
@@ -101,8 +104,8 @@ CONTAINS
       REAL(wp) ::   zcuw, zmuw, zc      ! local scalar
       REAL(wp) ::   zcvw, zmvw          !   -      -
       INTEGER , DIMENSION(A2D(nn_hls))     :: inml_mle
-      REAL(wp), DIMENSION(A2D(nn_hls))     :: zpsim_u, zpsim_v, zbld, zmld, zbm, zhu, zhv, zn2, zLf_NH, zLf_MH
-      REAL(wp), DIMENSION(A2D(nn_hls))     :: zxu, zxv
+      REAL(wp), DIMENSION(A2D(nn_hls))     :: zpsim_u, zpsim_v, zmld, zbm, zhu, zhv, zn2, zLf_NH, zLf_MH
+      !REAL(wp), DIMENSION(A2D(nn_hls))     :: zbld, zxu, zxv
       REAL(wp), DIMENSION(A2D(nn_hls),jpk) :: zpsi_uw, zpsi_vw
       REAL(wp), DIMENSION(A2D(nn_hls))     :: dbu, dbv
       !!----------------------------------------------------------------------
@@ -117,22 +120,22 @@ CONTAINS
             DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )
                zhu(ji,jj) = MIN( hmle(ji+1,jj), hmle(ji,jj) )
                zhv(ji,jj) = MIN( hmle(ji,jj+1), hmle(ji,jj) )
-               zxu(ji,jj) = MIN( hbl(ji+1,jj),  hbl(ji,jj) )
-               zxv(ji,jj) = MIN( hbl(ji,jj+1),  hbl(ji,jj) )
+               !zxu(ji,jj) = MIN( hbl(ji+1,jj),  hbl(ji,jj) )
+               !zxv(ji,jj) = MIN( hbl(ji,jj+1),  hbl(ji,jj) )
             END_2D
          CASE ( 1 )                                               != average of the 2 neighbour MLDs
             DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )
                zhu(ji,jj) = MAX( hmle(ji+1,jj), hmle(ji,jj) )
                zhv(ji,jj) = MAX( hmle(ji,jj+1), hmle(ji,jj) )
-               zxu(ji,jj) = MAX( hbl(ji+1,jj),  hbl(ji,jj) )
-               zxv(ji,jj) = MAX( hbl(ji,jj+1),  hbl(ji,jj) )
+               !zxu(ji,jj) = MAX( hbl(ji+1,jj),  hbl(ji,jj) )
+               !zxv(ji,jj) = MAX( hbl(ji,jj+1),  hbl(ji,jj) )
             END_2D
          CASE ( 2 )                                               != max of the 2 neighbour MLDs
             DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )
                zhu(ji,jj) = MAX( hmle(ji+1,jj), hmle(ji,jj) )
                zhv(ji,jj) = MAX( hmle(ji,jj+1), hmle(ji,jj) )
-               zxu(ji,jj) = MAX( hbl(ji+1,jj),  hbl(ji,jj) )
-               zxv(ji,jj) = MAX( hbl(ji,jj+1),  hbl(ji,jj) )
+               !zxu(ji,jj) = MAX( hbl(ji+1,jj),  hbl(ji,jj) )
+               !zxv(ji,jj) = MAX( hbl(ji,jj+1),  hbl(ji,jj) )
             END_2D
          END SELECT
          IF( nn_mle == 0 ) THEN           ! Fox-Kemper et al. 2010 formulation
@@ -159,10 +162,10 @@ CONTAINS
       ELSE !do not use osn_mle
          !                                      !==  MLD used for MLE  ==!
          !                                                ! compute from the 10m density to deal with the diurnal cycle
-         zbld(:,:) = 0._wp
-         DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )                    ! BLD
-            zbld(ji,jj) = zbld(ji,jj) + hbl(ji,jj)
-         END_2D
+         !zbld(:,:) = 0._wp
+         !DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )                    ! BLD
+         !   zbld(ji,jj) = zbld(ji,jj) + hbl(ji,jj)
+         !END_2D
          !
          DO_2D( nn_hls, nn_hls, nn_hls, nn_hls )
             inml_mle(ji,jj) = mbkt(ji,jj) + 1                    ! init. to number of ocean w-level (T-level + 1)
@@ -190,22 +193,22 @@ CONTAINS
             DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )
                zhu(ji,jj) = MIN( zmld(ji+1,jj), zmld(ji,jj) )
                zhv(ji,jj) = MIN( zmld(ji,jj+1), zmld(ji,jj) )
-               zxu(ji,jj) = MIN( zbld(ji+1,jj), zbld(ji,jj) )
-               zxv(ji,jj) = MIN( zbld(ji,jj+1), zbld(ji,jj) )
+               !zxu(ji,jj) = MIN( zbld(ji+1,jj), zbld(ji,jj) )
+               !zxv(ji,jj) = MIN( zbld(ji,jj+1), zbld(ji,jj) )
             END_2D
          CASE ( 1 )                                               != average of the 2 neighbour MLDs
             DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )
                zhu(ji,jj) = ( zmld(ji+1,jj) + zmld(ji,jj) ) * 0.5_wp
                zhv(ji,jj) = ( zmld(ji,jj+1) + zmld(ji,jj) ) * 0.5_wp
-               zxu(ji,jj) = ( zbld(ji+1,jj) + zbld(ji,jj) ) * 0.5_wp
-               zxv(ji,jj) = ( zbld(ji,jj+1) + zbld(ji,jj) ) * 0.5_wp
+               !zxu(ji,jj) = ( zbld(ji+1,jj) + zbld(ji,jj) ) * 0.5_wp
+               !zxv(ji,jj) = ( zbld(ji,jj+1) + zbld(ji,jj) ) * 0.5_wp
             END_2D
          CASE ( 2 )                                               != max of the 2 neighbour MLDs
             DO_2D( nn_hls, nn_hls-1, nn_hls, nn_hls-1 )
                zhu(ji,jj) = MAX( zmld(ji+1,jj), zmld(ji,jj) )
                zhv(ji,jj) = MAX( zmld(ji,jj+1), zmld(ji,jj) )
-               zxu(ji,jj) = MAX( zbld(ji+1,jj), zbld(ji,jj) )
-               zxv(ji,jj) = MAX( zbld(ji,jj+1), zbld(ji,jj) )
+               !zxu(ji,jj) = MAX( zbld(ji+1,jj), zbld(ji,jj) )
+               !zxv(ji,jj) = MAX( zbld(ji,jj+1), zbld(ji,jj) )
             END_2D
          END SELECT
          !                                                ! convert density into buoyancy
@@ -246,7 +249,7 @@ CONTAINS
             !
          ENDIF
          !                                      !==  External computation of MLE stream function ==!
-         CALL update_from_mle_b23( kt, zxu, zxv, zhu, zhv, dbu, dbv, ustar2_surf, swb0 )
+         CALL update_from_mle_b23( kt, zhu, zhv, dbu, dbv, swb0, p_sh2, p_avt, rn2, p_avm, dissl, en, taum )
          zpsim_u(:,:) = ext_psiu_mle(:,:) * e2u(:,:)    ! replace external stream function with e2u / e1v required for "transport"
          zpsim_v(:,:) = ext_psiv_mle(:,:) * e1v(:,:)
          !

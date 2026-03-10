@@ -70,7 +70,7 @@ CONTAINS
    END SUBROUTINE finalize_python_fields
 
 
-   SUBROUTINE update_from_mle_b23( kt, bldu, bldv, Hu, Hv, Db_u, Db_v, Ustar2, Fbuoy )
+   SUBROUTINE update_from_mle_b23( kt, Hu, Hv, Db_u, Db_v, Fbuoy, sh2, avt, rn2, dissl, en, taum )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inputs_MLE.C20  ***
       !!
@@ -80,8 +80,10 @@ CONTAINS
       !!                *
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in) ::   kt            ! ocean time step
-      REAL(wp), DIMENSION(jpi,jpj) :: bldu, bldv, Hu, Hv, Db_u, Db_v
-      REAL(wp), DIMENSION(jpi,jpj) :: Ustar2, Fbuoy
+      INTEGER, INTENT(in) ::   Nbb           ! time index
+      REAL(wp), DIMENSION(jpi,jpj) :: Hu, Hv, Db_u, Db_v
+      REAL(wp), DIMENSION(jpi,jpj) :: Fbuoy, taum
+      REAL(wp), DIMENSION(jpi,jpj,jpk) :: sh2, avt, rn2, dissl, en
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
@@ -89,10 +91,13 @@ CONTAINS
       CALL send_to_python( 'Hv', Hv, kt )    ! Send fields to Python models
       CALL send_to_python( 'Db_u', Db_u, kt )    ! Send fields to Python models
       CALL send_to_python( 'Db_v', Db_v, kt )    ! Send fields to Python models
-      CALL send_to_python( 'hu', bldu, kt )    ! Send fields to Python models
-      CALL send_to_python( 'hv', bldv, kt )    ! Send fields to Python models
-      CALL send_to_python( 'ustar2', Ustar2, kt )    ! Send fields to Python models
       CALL send_to_python( 'Fbuoy', Fbuoy, kt )    ! Send fields to Python models
+      CALL send_to_python( 'taum', taum, kt )    ! Send fields to Python models
+      CALL send_to_python( 'sh2', sh2(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'avt', avt(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'rn2', rn2(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'dissl', dissl(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'en', en(:,:,:,Nbb), kt )    ! Send fields to Python models
       !
       CALL receive_from_python( 'psi_u', ext_psiu_mle, kt )
       CALL receive_from_python( 'psi_v', ext_psiv_mle, kt )
