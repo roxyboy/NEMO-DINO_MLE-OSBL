@@ -18,7 +18,7 @@ def Is_None(*inputs):
 # ============================ #
 #             MLE              #
 # ============================ #
-def bounday_layer_depth(shp,Avt,n2.Avm,dissl,en,dbx,dby,H,S,cori,taum,rho0,Fb,dx,dy,dzt,dzwi,zw):
+def bounday_layer_depth(dedt,dbx,dby,H,S,cori,taum,rho0,Fb,dx,dy,dzt,dzwi,zw):
     if Is_None(k):
         return None
     else:
@@ -40,14 +40,14 @@ def bounday_layer_depth(shp,Avt,n2.Avm,dissl,en,dbx,dby,H,S,cori,taum,rho0,Fb,dx
         for i in range(N[0]):
             for j in range(N[1]):
 
-                rKmg = 0.7
-                kN2 = Avt[i,j] * n2[i,j]
-                diss = (0.5*rKmg) * dissl[i,j] * en[i,j]   # dissl = sqrt(en)/L
-                difu = (-np.diff( en[i,j] ) / dzt[i,j,:-1]
-                        * ..5*(Avm[i,j,1:]+Avm[i,j,:-1]))  # approximate with explicity eddy diffusion
-                difu = -np.diff( np.padd(difu, (1,1), mode="edge") 
-                               ) / dzw[i,j]  # ad-hoc Neumann boundary condition
-                e_t = shp[i,j] - kN2 + difu + diss
+                # rKmg = 0.7
+                # kN2 = Avt[i,j] * n2[i,j]
+                # diss = (0.5*rKmg) * dissl[i,j] * en[i,j]   # dissl = sqrt(en)/L
+                # difu = (-np.diff( en[i,j] ) / dzt[i,j,:-1]
+                #        * ..5*(Avm[i,j,1:]+Avm[i,j,:-1]))  # approximate with explicity eddy diffusion
+                # difu = -np.diff( np.padd(difu, (1,1), mode="edge") 
+                #               ) / dzw[i,j]  # ad-hoc Neumann boundary condition
+                # e_t = shp[i,j] - kN2 + difu + diss
 
                 mu = np.maximum(np.array([0.,]), 
                                 ( (1 - (2*zw[i,j]/H+1)**2)
@@ -58,7 +58,7 @@ def bounday_layer_depth(shp,Avt,n2.Avm,dissl,en,dbx,dby,H,S,cori,taum,rho0,Fb,dx
                     h = np.sum( dzw[i,j,:k] )
                     if h < H[i,j]:
                         res = ( np.sum( np.maximum(np.array([0.,]), kN2[i,j,:k]) * dzw[i,j,:k] )
-                                - np.sum( e_t[i,j,:k] * dzw[i,j,:k] )
+                                - np.sum( dedt[i,j,:k] * dzw[i,j,:k] )
                                 + mstar*ustar**3
                                 - nstar*np.sum( np.minimum(np.array([0.,]), kN2[i,j,:k]) * dzw[i,j,:k] )
                                 - np.sum( mle[i,j] * h * mu[:k] * dzw[i,j,:k] )

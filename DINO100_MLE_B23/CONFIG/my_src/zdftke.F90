@@ -97,13 +97,13 @@ MODULE zdftke
    REAL(wp) ::   rhftau_scl = 1.0_wp       ! scale factor applied to HF part of taum  (nn_etau=3)
 
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:)   ::   htau    ! depth of tke penetration (nn_htau)
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   dissl   ! now mixing lenght of dissipation
+   REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   dissl   ! now mixing lenght of dissipation
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   apdlr   ! now mixing lenght of dissipation
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_avm
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_sh2
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_avt
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   rn2
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   en
+   !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_avm
+   !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_sh2
+   !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_avt
+   !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   rn2
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   en_rhs
 
    !! * Substitutions
 #  include "do_loop_substitute.h90"
@@ -209,6 +209,8 @@ CONTAINS
       INTEGER                              , INTENT(in   ) ::   Kbb, Kmm       ! ocean time level indices
       REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(in   ) ::   p_sh2          ! shear production term
       REAL(wp), DIMENSION(:,:,:)           , INTENT(in   ) ::   p_avm, p_avt   ! vertical eddy viscosity & diffusivity (w-points)
+      REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(in   ) ::   en_rhs
+      REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(in   ) ::   eddy_diss
       !
       INTEGER ::   ji, jj, jk                  ! dummy loop arguments
       REAL(wp) ::   zetop, zebot, zmsku, zmskv ! local scalars
@@ -407,10 +409,11 @@ CONTAINS
          zdiag(ji,jj,jk) = 1._wp - zzd_lw - zzd_up + zfact2 * dissl(ji,jj,jk) * wmask(ji,jj,jk)
          !
          !                                   ! right hand side in en
-         en(ji,jj,jk) = en(ji,jj,jk) + rn_Dt * (  p_sh2(ji,jj,jk)                        &   ! shear
-            &                                 - p_avt(ji,jj,jk) * rn2(ji,jj,jk)          &   ! stratification
-            &                                 + zfact3 * dissl(ji,jj,jk) * en(ji,jj,jk)  &   ! dissipation
-            &                                ) * wmask(ji,jj,jk)
+         en_rhs(ji,jj,jk) = (  p_sh2(ji,jj,jk)                        &   ! shear
+            &                 - p_avt(ji,jj,jk) * rn2(ji,jj,jk)          &   ! stratification
+            &                 + zfact3 * dissl(ji,jj,jk) * en(ji,jj,jk)  &   ! dissipation
+            &               ) * wmask(ji,jj,jk)
+         en(ji,jj,jk) = en(ji,jj,jk) + rn_Dt * en_rhs(ji,jj,jk)
       END_3D
       !
       !                     !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -510,6 +513,11 @@ CONTAINS
                &                        * MAX( 0._wp, 1._wp - zice_fra(ji,jj) ) * wmask(ji,jj,jk) * tmask(ji,jj,1)
          END_3D
       ENDIF
+      !
+      DO_3D_OVR( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1, 2, jpkm1 )
+          eddy_diss(ji,jj,jk) = ( en(ji,jj,jk) - en_rhs(ji,jj,jk) * rn_Dt ) / rn_Dt
+          en_rhs(ji,jj,jk) = en_rhs(ji,jj,jk) + eddy_diss(ji,jj,jk)
+      END_3D
       !
    END SUBROUTINE tke_tke
 

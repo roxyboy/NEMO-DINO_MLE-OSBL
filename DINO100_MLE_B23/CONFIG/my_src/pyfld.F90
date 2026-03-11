@@ -70,7 +70,7 @@ CONTAINS
    END SUBROUTINE finalize_python_fields
 
 
-   SUBROUTINE update_from_mle_b23( kt, Hu, Hv, Db_u, Db_v, Fbuoy, sh2, avt, rn2, dissl, en, taum )
+   SUBROUTINE update_from_mle_b23( kt, Hu, Hv, Db_u, Db_v, Fbuoy, en_rhs, taum )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inputs_MLE.C20  ***
       !!
@@ -83,7 +83,7 @@ CONTAINS
       INTEGER, INTENT(in) ::   Nbb           ! time index
       REAL(wp), DIMENSION(jpi,jpj) :: Hu, Hv, Db_u, Db_v
       REAL(wp), DIMENSION(jpi,jpj) :: Fbuoy, taum
-      REAL(wp), DIMENSION(jpi,jpj,jpk) :: sh2, avt, rn2, dissl, en
+      REAL(wp), DIMENSION(jpi,jpj,jpk) :: en_rhs
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
@@ -93,11 +93,11 @@ CONTAINS
       CALL send_to_python( 'Db_v', Db_v, kt )    ! Send fields to Python models
       CALL send_to_python( 'Fbuoy', Fbuoy, kt )    ! Send fields to Python models
       CALL send_to_python( 'taum', taum, kt )    ! Send fields to Python models
-      CALL send_to_python( 'sh2', sh2(:,:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'avt', avt(:,:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'rn2', rn2(:,:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'dissl', dissl(:,:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'en', en(:,:,:,Nbb), kt )    ! Send fields to Python models
+      !CALL send_to_python( 'sh2', sh2(:,:,:,Nbb), kt )    ! Send fields to Python models
+      !CALL send_to_python( 'avt', avt(:,:,:,Nbb), kt )    ! Send fields to Python models
+      !CALL send_to_python( 'rn2', rn2(:,:,:,Nbb), kt )    ! Send fields to Python models
+      !CALL send_to_python( 'dissl', dissl(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'en_rhs', en_rhs(:,:,:,Nbb), kt )    ! Send fields to Python models
       !
       CALL receive_from_python( 'psi_u', ext_psiu_mle, kt )
       CALL receive_from_python( 'psi_v', ext_psiv_mle, kt )
