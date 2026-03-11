@@ -514,7 +514,7 @@ CONTAINS
          END_3D
       ENDIF
       !
-      DO_3D_OVR( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1, 2, jpkm1 )
+      DO_3D_OVR( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1, 2, jpkm1 )  !* eddy dissipation Avm as the residual
           eddy_diss(ji,jj,jk) = ( en(ji,jj,jk) - en_rhs(ji,jj,jk) * rn_Dt ) / rn_Dt
           en_rhs(ji,jj,jk) = en_rhs(ji,jj,jk) + eddy_diss(ji,jj,jk)
       END_3D
