@@ -18,25 +18,26 @@ def Is_None(*inputs):
 # ============================ #
 #             MLE              #
 # ============================ #
-def bounday_layer_depth(dedt,dbx,dby,H,S,cori,taum,rho0,Fb,dx,dy,dzt,dzwi,zw):
+def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
     if Is_None(k):
         return None
     else:
-        b_x = dbx / dx
-        b_y = dby / dy
+        b_x = dbx / dxu
+        b_y = dby / dyv
         mstar = 0.5
         nstar = 0.066
-        C_f = 0.03
+        # Cf = 0.03
         # rho0 = 1026.
         ustar = np.sqrt(taum/rho0)
         wstar3 = Fb*h
         wstar3 = np.where( wstar3>0., wstar3, 0. )
+        star3 = (mstar*ustar**3 + nstar*wstar3)**(2/3)
         mle = ( C_f * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
-               / (mstar*ustar**3 + nstar*wstar3)**(2/3) 
+               / star3 
               ) * 63/44
 
         bld = np.zeros_like(H)
-        N = e_t.shape
+        N = dedt.shape
         for i in range(N[0]):
             for j in range(N[1]):
 
@@ -47,7 +48,7 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,taum,rho0,Fb,dx,dy,dzt,dzwi,zw):
                 #        * ..5*(Avm[i,j,1:]+Avm[i,j,:-1]))  # approximate with explicity eddy diffusion
                 # difu = -np.diff( np.padd(difu, (1,1), mode="edge") 
                 #               ) / dzw[i,j]  # ad-hoc Neumann boundary condition
-                # e_t = shp[i,j] - kN2 + difu + diss
+                # dedt = shp[i,j] - kN2 + difu + diss
 
                 mu = np.maximum(np.array([0.,]), 
                                 ( (1 - (2*zw[i,j]/H+1)**2)
@@ -75,21 +76,22 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,taum,rho0,Fb,dx,dy,dzt,dzwi,zw):
                         bld[i,j] = H[i,j]
                         break
          
-        return bld
+        return bld, star3
 
 
-def vert_buoyancy_flux(db,h,H,S,dl,cori,Fb):
+def vert_buoyancy_flux(db,H,S,dl,cori,Fb,dedt,db2,taum,rho0,dl2,dzt,dzw,zw,Cf=0.03):
     """ Compute vertical buoyancy flux induced streamfunction with expression (13) from doi.org/10.1016/j.ocemod.2020.101678 """
     if Is_None(db,H):
         return None
     else:
         grad_b = db / dl
-        mstar = 0.5
-        nstar = 0.066
-        C_f = 0.03
-        ustar3 = np.sqrt(ustar2)**3
-        wstar3 = Fb*h
-        wstar3 = np.where(wstar3>0., wstar3, 0.)
-        return ( C_f * S * np.abs(cori) * h * H**2 * grad_b 
-                / (mstar*ustar3 + nstar*wstar3)**(2/3) )
+        # mstar = 0.5
+        # nstar = 0.066
+        # ustar3 = np.sqrt(ustar2)**3
+        # wstar3 = Fb*h
+        # wstar3 = np.where(wstar3>0., wstar3, 0.)
+        h, s3 = boundary_layer_depth(dedt,db,db2,H,S,cori,Fb,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
+
+        return ( Cf * S * np.abs(cori) * h * H**2 * grad_b 
+                / s3 )
 
