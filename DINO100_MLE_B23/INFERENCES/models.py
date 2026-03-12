@@ -31,7 +31,7 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf
         ustar = np.sqrt(taum/rho0)
         wstar3 = Fb*h
         wstar3 = np.where( wstar3>0., wstar3, 0. )
-        star3 = (mstar*ustar**3 + nstar*wstar3)**(2/3)
+        star3 = ( mstar*ustar**3 + nstar*wstar3 )**(2/3)
         mle = ( C_f * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
                / star3 
               ) * 63/44
@@ -51,18 +51,18 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf
                 # dedt = shp[i,j] - kN2 + difu + diss
 
                 mu = np.maximum(np.array([0.,]), 
-                                ( (1 - (2*zw[i,j]/H+1)**2)
-                                 * (1 + 5/21*(2*zw[i,j]/H+1)**2) )
+                                ( (1 - (2*zw/H+1)**2)
+                                 * (1 + 5/21*(2*zw/H+1)**2) )
                                )
 
                 for k in range(1,N[2]):
-                    h = np.sum( dzw[i,j,:k] )
+                    h = np.sum( dzw[:k] )
                     if h < H[i,j]:
-                        res = ( np.sum( np.maximum(np.array([0.,]), kN2[i,j,:k]) * dzw[i,j,:k] )
-                                - np.sum( dedt[i,j,:k] * dzw[i,j,:k] )
+                        res = ( np.sum( np.maximum(np.array([0.,]), kN2[i,j,:k]) * dzw[:k] )
+                                - np.sum( dedt[i,j,:k] * dzw[:k] )
                                 + mstar*ustar**3
-                                - nstar*np.sum( np.minimum(np.array([0.,]), kN2[i,j,:k]) * dzw[i,j,:k] )
-                                - np.sum( mle[i,j] * h * mu[:k] * dzw[i,j,:k] )
+                                - nstar*np.sum( np.minimum(np.array([0.,]), kN2[i,j,:k]) * dzw[:k] )
+                                - np.sum( mle[i,j] * h * mu[:k] * dzw[:k] )
                               )
                         if k == 1:
                             res0 = np.abs(res)
@@ -70,7 +70,7 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf
                             if np.abs(res) < res0:
                                 res0 = np.abs(res)
                             else:
-                                bld[i,j] = h - dzw[i,j,k-1]
+                                bld[i,j] = h - dzw[k-1]
                                 break
                     else:
                         bld[i,j] = H[i,j]
