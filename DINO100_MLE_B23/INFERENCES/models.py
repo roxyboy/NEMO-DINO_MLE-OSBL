@@ -18,7 +18,10 @@ def Is_None(*inputs):
 # ============================ #
 #             MLE              #
 # ============================ #
-def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
+def boundary_layer_depth(dedt,avt,n2,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
+    """
+       Iteratively find the boundary layer depth to be used in MLE param.
+    """
     if Is_None(k):
         return None
     else:
@@ -27,19 +30,17 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf
         mstar = 0.5
         nstar = 0.066
         # Cf = 0.03
-        # rho0 = 1026.
-        ustar = np.sqrt(taum/rho0)
-        wstar3 = Fb*h
-        wstar3 = np.where( wstar3>0., wstar3, 0. )
-        star3 = ( mstar*ustar**3 + nstar*wstar3 )**(2/3)
+        # rho0 = 1025.
+        ustar = np.sqrt( np.abs(taum)/rho0 )
         mle = ( C_f * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
-               / star3 
+        #        / star2 
               ) * 63/44
 
         bld = np.zeros_like(H)
-        N = dedt.shape
-        for i in range(N[0]):
-            for j in range(N[1]):
+        Nn = dedt.shape
+
+        for i in range(Nn[0]):
+            for j in range(Nn[1]):
 
                 # rKmg = 0.7
                 # kN2 = Avt[i,j] * n2[i,j]
@@ -54,33 +55,46 @@ def bounday_layer_depth(dedt,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf
                                 ( (1 - (2*zw/H+1)**2)
                                  * (1 + 5/21*(2*zw/H+1)**2) )
                                )
+                kN2 = avt[i,j] * n2[i,j]
 
-                for k in range(1,N[2]):
+                for k in range(1,Nn[2]):
+
                     h = np.sum( dzw[:k] )
+                    
                     if h < H[i,j]:
-                        res = ( np.sum( np.maximum(np.array([0.,]), kN2[i,j,:k]) * dzw[:k] )
-                                - np.sum( dedt[i,j,:k] * dzw[:k] )
-                                + mstar*ustar**3
-                                - nstar*np.sum( np.minimum(np.array([0.,]), kN2[i,j,:k]) * dzw[:k] )
-                                - np.sum( mle[i,j] * h * mu[:k] * dzw[:k] )
+                        wstar3 = Fb[i,j] * h    # h needs to be found iteratively!
+                        wstar3 = np.where( wstar3>0., wstar3, 0. )
+                        star2 = ( mstar*ustar[i,j]**3 + nstar*wstar3 )**(2/3)
+                        res = ( np.sum( np.minimum(np.array([0.,]), -kN2[:k]) * dzw[:k] )
+                                + np.sum( dedt[i,j,:k] * dzw[:k] )
+                                - mstar*ustar**3
+                                + nstar*np.sum( np.minimum(np.array([0.,]), kN2[:k]) * dzw[:k] )
+                                + np.sum( (mle[i,j] / star2) 
+                                         * h * mu[:k] * dzw[:k] 
+                                        )
                               )
                         if k == 1:
                             res0 = np.abs(res)
+                            bld[i,j] = h
                         else:
                             if np.abs(res) < res0:
                                 res0 = np.abs(res)
-                            else:
-                                bld[i,j] = h - dzw[k-1]
-                                break
+                                bld[i,j] = h
+                            # else:
+                            #     bld[i,j] = h - dzw[k]
+                            #     break
                     else:
                         bld[i,j] = H[i,j]
                         break
          
-        return bld, star3
+        return bld, star2
 
 
-def vert_buoyancy_flux(db,H,S,dl,cori,Fb,dedt,db2,taum,rho0,dl2,dzt,dzw,zw,Cf=0.03):
-    """ Compute vertical buoyancy flux induced streamfunction with expression (13) from doi.org/10.1016/j.ocemod.2020.101678 """
+def mle_stream_func(db,H,S,dl,cori,Fb,dedt,avt,n2,taum,rho0,db2,dl2,dzt,dzw,zw,Cf=0.03):
+    """ 
+        Compute vertical buoyancy flux induced streamfunction with 
+        expression (27) from doi.org/10.1175%2Fjpo-d-21-0297.1 
+    """
     if Is_None(db,H):
         return None
     else:
@@ -90,8 +104,8 @@ def vert_buoyancy_flux(db,H,S,dl,cori,Fb,dedt,db2,taum,rho0,dl2,dzt,dzw,zw,Cf=0.
         # ustar3 = np.sqrt(ustar2)**3
         # wstar3 = Fb*h
         # wstar3 = np.where(wstar3>0., wstar3, 0.)
-        h, s3 = boundary_layer_depth(dedt,db,db2,H,S,cori,Fb,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
+        h, s2 = boundary_layer_depth(dedt,avt,n2,db,db2,H,S,cori,Fb,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
 
         return ( Cf * S * np.abs(cori) * h * H**2 * grad_b 
-                / s3 )
+                / s2 )
 

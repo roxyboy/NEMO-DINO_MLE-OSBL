@@ -15,7 +15,7 @@ def ocean_info():
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
                             'grids' : { 'DINO_Grid' : {'npts' : (62,199), 'halos' : 7, 'bnd' : ('close','close') }  }, \
                             'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['hu','hv','Hu','Hv','Db_u','Db_v','Fbuoy','taum'], 'out' : ['psi_u','psi_v']},
-                                        {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['en_rhs'], 'out' : []}
+                                        {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['avt','n2','en_rhs'], 'out' : []}
                                       ] }
                         )
                         
@@ -70,6 +70,9 @@ def production():
     # get metrics
     e1u = nemo_metrics.receive('e1u')
     e2v = nemo_metrics.receive('e2v')
+    e3t = nemo_metrics.receive('e3t')
+    e3w = nemo_metrics.receive('e3w')
+    depthw = nemo_metrics.receive('depthw')
 
     Ds_x = e1u
     Ds_x [ Ds_x > 111.e3 ] = 111.e3
@@ -79,8 +82,9 @@ def production():
     # constants
     omega = 7.292115083046062e-5
     Lat = nemo_nml.get('rn_lat')
-    f_corio = 2.0 * omega * sin( Lat * pi / 180.)
+    f_cori = 2.0 * omega * sin( Lat * pi / 180.)
     #C_Lfa = Ce / ( 5000.0 * 2.0 * omega * sin( Lat * pi / 180.) )
+    rho0 = 1025.
 
     #  Assemble
     # ++++++++++
@@ -88,8 +92,14 @@ def production():
     def loop_core(**inputs):
         outputs = {}
         
-        outputs['psi_u'] = vert_buoyancy_flux( db=inputs['Db_u'], H=inputs['Hu'], h=inputs['hu'], S=Ds_x, dl=e1u, cori=f_corio, ustar2=inputs['ustar2'], Fb=inputs['Fbuoy'] )
-        outputs['psi_v'] = vert_buoyancy_flux( db=inputs['Db_v'], H=inputs['Hv'], h=inputs['hv'], S=Ds_y, dl=e2v, cori=f_corio, ustar2=inputs['ustar2'], Fb=inputs['Fbuoy'] )
+        outputs['psi_u'] = mle_stream_func( db=inputs['Db_u'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fb=inputs['Fbuoy'], 
+                dedt=inputs['en_rhs'], avt=inputs['avt'], n2=inputs['n2'], taum=inputs['taum'], rho0=rho0, 
+                db2=inputs['Db_v'], dl2=e2v, dzt=e3t, dzw=e3w, zw=depthw 
+                )
+        outputs['psi_v'] = mle_stream_func( db=inputs['Db_v'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fb=inputs['Fbuoy'], 
+                dedt=inputs['en_rhs'], avt=inputs['avt'], n2=inputs['n2'], taum=inputs['taum'], rho0=rho0, 
+                db2=inputs['Db_u'], dl2=e1u, dzt=e3t, dzw=e3w, zw=depthw 
+                )
         
         return outputs
 

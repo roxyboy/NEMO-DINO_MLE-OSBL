@@ -70,7 +70,7 @@ CONTAINS
    END SUBROUTINE finalize_python_fields
 
 
-   SUBROUTINE update_from_mle_b23( kt, Hu, Hv, Db_u, Db_v, Fbuoy, en_rhs, taum )
+   SUBROUTINE update_from_mle_b23( kt, Hu, Hv, Db_u, Db_v, Fbuoy, taum, avt, n2, en_rhs )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inputs_MLE.C20  ***
       !!
@@ -83,7 +83,7 @@ CONTAINS
       INTEGER, INTENT(in) ::   Nbb           ! time index
       REAL(wp), DIMENSION(jpi,jpj) :: Hu, Hv, Db_u, Db_v
       REAL(wp), DIMENSION(jpi,jpj) :: Fbuoy, taum
-      REAL(wp), DIMENSION(jpi,jpj,jpk) :: en_rhs
+      REAL(wp), DIMENSION(jpi,jpj,jpk) :: avt, n2, en_rhs
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
@@ -94,8 +94,8 @@ CONTAINS
       CALL send_to_python( 'Fbuoy', Fbuoy, kt )    ! Send fields to Python models
       CALL send_to_python( 'taum', taum, kt )    ! Send fields to Python models
       !CALL send_to_python( 'sh2', sh2(:,:,:,Nbb), kt )    ! Send fields to Python models
-      !CALL send_to_python( 'avt', avt(:,:,:,Nbb), kt )    ! Send fields to Python models
-      !CALL send_to_python( 'rn2', rn2(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'avt', avt(:,:,:,Nbb), kt )    ! Send fields to Python models
+      CALL send_to_python( 'rn2', rn2(:,:,:,Nbb), kt )    ! Send fields to Python models
       !CALL send_to_python( 'dissl', dissl(:,:,:,Nbb), kt )    ! Send fields to Python models
       CALL send_to_python( 'en_rhs', en_rhs(:,:,:,Nbb), kt )    ! Send fields to Python models
       !
