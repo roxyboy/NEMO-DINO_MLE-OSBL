@@ -32,7 +32,7 @@ def boundary_layer_depth(dedt,avt,n2,dbx,dby,hmin,H,S,cori,Fb,taum,rho0,dxu,dyv,
         # Cf = 0.03
         # rho0 = 1025.
         ustar = np.sqrt( np.abs(taum)/rho0 )
-        mle = ( C_f * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
+        mle = ( Cf * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
         #        / star2 
               ) * 63/44
 
