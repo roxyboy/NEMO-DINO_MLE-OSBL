@@ -22,7 +22,7 @@ def ocean_info():
     # static coupling (manual send/receive)
     tunnel_config.append( { 'label' : 'TO_NEMO_METRICS', \
                             'grids' : { 'DINO_Grid' : {'npts' : (62,199), 'halos' : 7, 'bnd' : ('close','close') }  }, \
-                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['e1u','e2v'], 'out' : []},
+                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['htau','e1u','e2v'], 'out' : []},
                                         {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['e3t','e3w','depthw'], 'out' : []}
                                       ] }
                         )
@@ -92,11 +92,13 @@ def production():
     def loop_core(**inputs):
         outputs = {}
         
-        outputs['psi_u'] = mle_stream_func( db=inputs['Db_u'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fb=inputs['Fbuoy'], 
+        outputs['psi_u'] = mle_stream_func( 
+                db=inputs['Db_u'], hmin=inputs['htau'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fb=inputs['Fbuoy'], 
                 dedt=inputs['en_rhs'], avt=inputs['avt'], n2=inputs['n2'], taum=inputs['taum'], rho0=rho0, 
                 db2=inputs['Db_v'], dl2=e2v, dzt=e3t, dzw=e3w, zw=depthw 
                 )
-        outputs['psi_v'] = mle_stream_func( db=inputs['Db_v'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fb=inputs['Fbuoy'], 
+        outputs['psi_v'] = mle_stream_func( 
+                db=inputs['Db_v'], hmin=inputs['htau'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fb=inputs['Fbuoy'], 
                 dedt=inputs['en_rhs'], avt=inputs['avt'], n2=inputs['n2'], taum=inputs['taum'], rho0=rho0, 
                 db2=inputs['Db_u'], dl2=e1u, dzt=e3t, dzw=e3w, zw=depthw 
                 )

@@ -18,7 +18,7 @@ def Is_None(*inputs):
 # ============================ #
 #             MLE              #
 # ============================ #
-def boundary_layer_depth(dedt,avt,n2,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
+def boundary_layer_depth(dedt,avt,n2,dbx,dby,hmin,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
     """
        Iteratively find the boundary layer depth to be used in MLE param.
     """
@@ -52,16 +52,16 @@ def boundary_layer_depth(dedt,avt,n2,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,d
                 # dedt = shp[i,j] - kN2 + difu + diss
 
                 mu = np.maximum(np.array([0.,]), 
-                                ( (1 - (2*zw/H+1)**2)
-                                 * (1 + 5/21*(2*zw/H+1)**2) )
+                                ( (1 - (2*np.abs(zw)/np.abs(H) + 1)**2)
+                                 * (1 + 5/21*(2*np.abs(zw)/np.abs(H) + 1)**2) )
                                )
                 kN2 = avt[i,j] * n2[i,j]
 
-                for k in range(1,Nn[2]):
+                for k in range(1,Nn[2]+1):
 
                     h = np.sum( dzw[:k] )
                     
-                    if h < H[i,j]:
+                    if h > hmin[i,j] and h < np.abs(H[i,j]):
                         wstar3 = Fb[i,j] * h    # h needs to be found iteratively!
                         wstar3 = np.where( wstar3>0., wstar3, 0. )
                         star2 = ( mstar*ustar[i,j]**3 + nstar*wstar3 )**(2/3)
@@ -84,13 +84,13 @@ def boundary_layer_depth(dedt,avt,n2,dbx,dby,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,d
                             #     bld[i,j] = h - dzw[k]
                             #     break
                     else:
-                        bld[i,j] = H[i,j]
+                        bld[i,j] = np.abs(H[i,j])
                         break
          
         return bld, star2
 
 
-def mle_stream_func(db,H,S,dl,cori,Fb,dedt,avt,n2,taum,rho0,db2,dl2,dzt,dzw,zw,Cf=0.03):
+def mle_stream_func(db,hmin,H,S,dl,cori,Fb,dedt,avt,n2,taum,rho0,db2,dl2,dzt,dzw,zw,Cf=0.03):
     """ 
         Compute vertical buoyancy flux induced streamfunction with 
         expression (27) from doi.org/10.1175%2Fjpo-d-21-0297.1 
@@ -104,7 +104,7 @@ def mle_stream_func(db,H,S,dl,cori,Fb,dedt,avt,n2,taum,rho0,db2,dl2,dzt,dzw,zw,C
         # ustar3 = np.sqrt(ustar2)**3
         # wstar3 = Fb*h
         # wstar3 = np.where(wstar3>0., wstar3, 0.)
-        h, s2 = boundary_layer_depth(dedt,avt,n2,db,db2,H,S,cori,Fb,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
+        h, s2 = boundary_layer_depth(dedt,avt,n2,db,db2,hmin,H,S,cori,Fb,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
 
         return ( Cf * S * np.abs(cori) * h * H**2 * grad_b 
                 / s2 )
