@@ -30,7 +30,7 @@ MODULE tramle
    USE zdf_oce, ONLY : ln_zdfosm
    USE zdfosm, ONLY  : ln_osm_mle, hmle, dbdx_mle, dbdy_mle, mld_prof, swb0
    !USE zdfgls, ONLY  : ustar2_surf
-   USE zdftke, ONLY  : p_avt, rn2, en_rhs
+   USE zdftke, ONLY  : htau, en_prod, en_rhs
 
    IMPLICIT NONE
    PRIVATE
@@ -249,7 +249,7 @@ CONTAINS
             !
          ENDIF
          !                                      !==  External computation of MLE stream function ==!
-         CALL update_from_mle_b23( kt, zhu, zhv, dbu, dbv, swb0, taum, p_avt, rn2, en_rhs )
+         CALL update_from_mle_b23( kt, htau, zhu, zhv, dbu, dbv, swb0, taum, en_prod, en_rhs )
          zpsim_u(:,:) = ext_psiu_mle(:,:) * e2u(:,:)    ! replace external stream function with e2u / e1v required for "transport"
          zpsim_v(:,:) = ext_psiv_mle(:,:) * e1v(:,:)
          !

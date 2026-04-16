@@ -96,13 +96,13 @@ MODULE zdftke
    REAL(wp) ::   rhftau_add = 1.e-3_wp     ! add offset   applied to HF part of taum  (nn_etau=3)
    REAL(wp) ::   rhftau_scl = 1.0_wp       ! scale factor applied to HF part of taum  (nn_etau=3)
 
-   REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:)   ::   htau    ! depth of tke penetration (nn_htau)
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:)   ::   htau    ! depth of tke penetration (nn_htau)
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   dissl   ! now mixing lenght of dissipation
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   apdlr   ! now mixing lenght of dissipation
    !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_avm
    !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_sh2
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   p_avt
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   rn2
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   en_prod
+   !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   rn2
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   en_rhs
 
    !! * Substitutions
@@ -120,7 +120,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !!                ***  FUNCTION zdf_tke_alloc  ***
       !!----------------------------------------------------------------------
-      ALLOCATE( htau(jpi,jpj) , dissl(jpi,jpj,jpk) , apdlr(jpi,jpj,jpk) ,   STAT= zdf_tke_alloc )
+      ALLOCATE( htau(jpi,jpj) , dissl(jpi,jpj,jpk) , apdlr(jpi,jpj,jpk) , en_prod(jpi,jpj,jpk) , en_rhs(jpi,jpj,jpk) ,  STAT= zdf_tke_alloc )
       !
       CALL mpp_sum ( 'zdftke', zdf_tke_alloc )
       IF( zdf_tke_alloc /= 0 )   CALL ctl_stop( 'STOP', 'zdf_tke_alloc: failed to allocate arrays' )
@@ -209,8 +209,8 @@ CONTAINS
       INTEGER                              , INTENT(in   ) ::   Kbb, Kmm       ! ocean time level indices
       REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(in   ) ::   p_sh2          ! shear production term
       REAL(wp), DIMENSION(:,:,:)           , INTENT(in   ) ::   p_avm, p_avt   ! vertical eddy viscosity & diffusivity (w-points)
-      REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(in   ) ::   en_rhs
-      REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(in   ) ::   eddy_diss
+      !REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(inout) ::   en_rhs
+      !REAL(wp), DIMENSION(A2D(nn_hls),jpk) , INTENT(inout) ::   eddy_diss, en_prod
       !
       INTEGER ::   ji, jj, jk                  ! dummy loop arguments
       REAL(wp) ::   zetop, zebot, zmsku, zmskv ! local scalars
@@ -226,6 +226,7 @@ CONTAINS
       INTEGER , DIMENSION(A2D(nn_hls))     ::   imlc
       REAL(wp), DIMENSION(A2D(nn_hls))     ::   zice_fra, zhlc, zus3, zWlc2
       REAL(wp), DIMENSION(A2D(nn_hls),jpk) ::   zpelc, zdiag, zd_up, zd_lw
+      REAL(wp), DIMENSION(A2D(nn_hls),jpk) ::   eddy_diss
       REAL(wp), DIMENSION(:,:,:), ALLOCATABLE, SAVE ::   ztmp ! for diags
       REAL(wp) :: zdiv
       !!--------------------------------------------------------------------
@@ -409,8 +410,9 @@ CONTAINS
          zdiag(ji,jj,jk) = 1._wp - zzd_lw - zzd_up + zfact2 * dissl(ji,jj,jk) * wmask(ji,jj,jk)
          !
          !                                   ! right hand side in en
+         en_prod(ji,jj,jk) = p_avt(ji,jj,jk) * rn2(ji,jj,jk)
          en_rhs(ji,jj,jk) = (  p_sh2(ji,jj,jk)                        &   ! shear
-            &                 - p_avt(ji,jj,jk) * rn2(ji,jj,jk)          &   ! stratification
+            &                 - en_prod(ji,jj,jk)          &   ! stratification
             &                 + zfact3 * dissl(ji,jj,jk) * en(ji,jj,jk)  &   ! dissipation
             &               ) * wmask(ji,jj,jk)
          en(ji,jj,jk) = en(ji,jj,jk) + rn_Dt * en_rhs(ji,jj,jk)
