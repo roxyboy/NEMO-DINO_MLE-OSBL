@@ -9,6 +9,8 @@ import os
 def ocean_info():
     # ocean namelist
     nemo_nml = eophis.FortranNamelist(os.path.join(os.getcwd(),'namelist_cfg'))
+    step,  = nemo_nml.get('rn_Dt')
+    nlvl = 36
 
     # coupling config
     tunnel_config = list()
@@ -65,7 +67,7 @@ def production():
 
     #  Models
     # ++++++++
-    from models import vert_buoyancy_flux
+    from models import mle_stream_func
 
     # get metrics
     e1u = nemo_metrics.receive('e1u')
