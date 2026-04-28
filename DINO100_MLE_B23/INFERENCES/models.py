@@ -18,7 +18,7 @@ def Is_None(*inputs):
 # ============================ #
 #             MLE              #
 # ============================ #
-def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
+def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
     """
        Iteratively find the boundary layer depth to be used in MLE param.
     """
@@ -35,6 +35,14 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt
         mle = ( Cf * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
         #        / star2 
               ) * 63/44
+
+        grav = 9.807
+        # Qs = g*(beta*1e3)*dsf_sub.saltflx # m/s2.(kg/s)/m2
+        Qt = (Fsr + Fns)              # W/m2 = (kg.m2/s3)/m2
+        Cp = 1005.
+        rho_air = 1.225
+        Ba = grav*alpha * (Qt/rho_air/Cp)
+        Fb = np.abs( np.where(Ba<0., Ba, 0.) )
 
         bld = np.zeros_like(H)
         Nn = dedt.shape
@@ -63,7 +71,7 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt
                     
                     if h > hmin[i,j] and h < np.abs(H[i,j]):
                         wstar3 = Fb[i,j] * h    # h needs to be found iteratively!
-                        wstar3 = np.where( wstar3>0., wstar3, 0. )
+                        # wstar3 = np.where( wstar3>0., wstar3, 0. )
                         star2 = ( mstar*ustar[i,j]**3 + nstar*wstar3 )**(2/3)
                         res = ( np.sum( np.minimum(np.array([0.,]), -kN2[i,j,:k]) * dzw[:k] )
                                 + np.sum( dedt[i,j,:k] * dzw[:k] )
@@ -90,7 +98,7 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fb,taum,rho0,dxu,dyv,dzt
         return bld, star2
 
 
-def mle_stream_func(db,hmin,H,S,dl,cori,Fb,dedt,kN2,taum,rho0,db2,dl2,dzt,dzw,zw,Cf=0.03):
+def mle_stream_func(db,hmin,H,S,dl,cori,Fsr,Fns,dedt,kN2,taum,rho0,db2,dl2,dzt,dzw,zw,Cf=0.03):
     """ 
         Compute vertical buoyancy flux induced streamfunction with 
         expression (27) from doi.org/10.1175%2Fjpo-d-21-0297.1 
@@ -104,7 +112,7 @@ def mle_stream_func(db,hmin,H,S,dl,cori,Fb,dedt,kN2,taum,rho0,db2,dl2,dzt,dzw,zw
         # ustar3 = np.sqrt(ustar2)**3
         # wstar3 = Fb*h
         # wstar3 = np.where(wstar3>0., wstar3, 0.)
-        h, s2 = boundary_layer_depth(dedt,kN2,db,db2,hmin,H,S,cori,Fb,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
+        h, s2 = boundary_layer_depth(dedt,kN2,db,db2,hmin,H,S,cori,Fsr,Fns,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
 
         return ( Cf * S * np.abs(cori) * h * H**2 * grad_b 
                 / s2 )

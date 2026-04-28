@@ -16,7 +16,7 @@ def ocean_info():
     tunnel_config = list()
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
                             'grids' : { 'DINO_Grid' : {'npts' : (62,199), 'halos' : 7, 'bnd' : ('close','close') }  }, \
-                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v','Fbuoy','taum'], 'out' : ['psi_u','psi_v']},
+                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v','qsr','qns','taum'], 'out' : ['psi_u','psi_v']},
                                         {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['en_prod','en_rhs'], 'out' : []}
                                       ] }
                         )
@@ -95,12 +95,12 @@ def production():
         outputs = {}
         
         outputs['psi_u'] = mle_stream_func( 
-                db=inputs['Db_u'], hmin=inputs['htau'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fb=inputs['Fbuoy'], 
+                db=inputs['Db_u'], hmin=inputs['htau'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fsr=inputs['qsr'], Fns=inputs['qns'], 
                 dedt=inputs['en_rhs'], kN2=inputs['en_prod'], taum=inputs['taum'], rho0=rho0, 
                 db2=inputs['Db_v'], dl2=e2v, dzt=e3t, dzw=e3w, zw=depthw 
                 )
         outputs['psi_v'] = mle_stream_func( 
-                db=inputs['Db_v'], hmin=inputs['htau'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fb=inputs['Fbuoy'], 
+                db=inputs['Db_v'], hmin=inputs['htau'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fsr=inputs['qsr'], Fns=inputs['qns']
                 dedt=inputs['en_rhs'], kN2=inputs['en_prod'], taum=inputs['taum'], rho0=rho0, 
                 db2=inputs['Db_u'], dl2=e1u, dzt=e3t, dzw=e3w, zw=depthw 
                 )
