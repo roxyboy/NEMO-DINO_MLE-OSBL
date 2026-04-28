@@ -403,6 +403,7 @@
    ln_zdfcst   = .false.      !  constant mixing
    ln_zdftke   = .true.       !  Turbulent Kinetic Energy closure       (T =>   fill namzdf_tke)
    !                       ! convection
+   ln_zdfosm   = .false.
    ln_zdfevd   = .true.       !  enhanced vertical diffusion (when unstable)
       nn_evdm     =    1         ! apply on tracer (=0) or on tracer and momentum (=1)
       rn_evd      =  100.        ! mixing coefficient [m2/s]
