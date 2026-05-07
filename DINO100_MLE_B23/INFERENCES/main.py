@@ -83,7 +83,7 @@ def production():
 
     # constants
     omega = 7.292115083046062e-5
-    Lat = nemo_nml.get('rn_lat')
+    Lat, = nemo_nml.get('rn_lat')
     f_cori = 2.0 * omega * sin( Lat * pi / 180.)
     #C_Lfa = Ce / ( 5000.0 * 2.0 * omega * sin( Lat * pi / 180.) )
     rho0 = 1025.
