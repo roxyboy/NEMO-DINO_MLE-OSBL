@@ -18,11 +18,11 @@ def Is_None(*inputs):
 # ============================ #
 #             MLE              #
 # ============================ #
-def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,dxu,dyv,dzt,dzw,zw,Cf):
+def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,alpha,dxu,dyv,dzw,zw,Cf):
     """
        Iteratively find the boundary layer depth to be used in MLE param.
     """
-    if Is_None(k):
+    if Is_None(dbx,dby,H):
         return None
     else:
         b_x = dbx / dxu
@@ -60,27 +60,28 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,dxu,dy
                 #               ) / dzw[i,j]  # ad-hoc Neumann boundary condition
                 # dedt = shp[i,j] - kN2 + difu + diss
 
-                mu = np.maximum(np.array([0.,]), 
-                                ( (1 - (2*np.abs(zw)/np.abs(H) + 1)**2)
-                                 * (1 + 5/21*(2*np.abs(zw)/np.abs(H) + 1)**2) )
-                               )
                 # kN2 = avt[i,j] * n2[i,j]
 
                 for k in range(1,Nn[2]+1):
 
-                    h = np.sum( dzw[:k] )
+                    h = np.sum( dzw[i,j,:k] )
                     
                     if h >= hmin[i,j]:
+                        mu = np.maximum(np.array([0.,]),
+                                ( (1 - (2*np.abs(zw[i,j,:k])/np.abs(H[i,j]) + 1)**2)
+                                    * (1 + 5/21*(2*np.abs(zw[i,j,:k])/np.abs(H[i,j]) + 1)**2) )
+                               )
+
                         if h < np.abs(H[i,j]):
                             wstar3 = Fb[i,j] * h    # h needs to be found iteratively!
                             # wstar3 = np.where( wstar3>0., wstar3, 0. )
                             star2 = ( mstar*ustar[i,j]**3 + nstar*wstar3 )**(2/3)
-                            res = ( np.sum( np.minimum(np.array([0.,]), -kN2[i,j,:k]) * dzw[:k] )
-                                + np.sum( dedt[i,j,:k] * dzw[:k] )
+                            res = ( np.sum( np.minimum(np.array([0.,]), -kN2[i,j,:k]) * dzw[i,j,:k] )
+                                + np.sum( dedt[i,j,:k] * dzw[i,j,:k] )
                                 - mstar*ustar**3
-                                + nstar*np.sum( np.minimum(np.array([0.,]), kN2[:k]) * dzw[:k] )
+                                + nstar*np.sum( np.minimum(np.array([0.,]), kN2[:k]) * dzw[i,j,:k] )
                                 + np.sum( (mle[i,j] / star2) 
-                                         * h * mu[:k] * dzw[:k] 
+                                         * h * mu[:k] * dzw[i,j,:k] 
                                         )
                               )
                             if 'res0' not in locals():
@@ -106,7 +107,7 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,dxu,dy
         return bld, star2
 
 
-def mle_stream_func(db,hmin,H,S,dl,cori,Fsr,Fns,dedt,kN2,taum,rho0,db2,dl2,dzt,dzw,zw,Cf=0.03):
+def mle_stream_func(db,hmin,H,S,dl,cori,Fsr,Fns,dedt,kN2,taum,rho0,db2,dl2,alpha,dzw,zw,Cf=0.03):
     """ 
         Compute vertical buoyancy flux induced streamfunction with 
         expression (27) from doi.org/10.1175%2Fjpo-d-21-0297.1 
@@ -120,7 +121,7 @@ def mle_stream_func(db,hmin,H,S,dl,cori,Fsr,Fns,dedt,kN2,taum,rho0,db2,dl2,dzt,d
         # ustar3 = np.sqrt(ustar2)**3
         # wstar3 = Fb*h
         # wstar3 = np.where(wstar3>0., wstar3, 0.)
-        h, s2 = boundary_layer_depth(dedt,kN2,db,db2,hmin,H,S,cori,Fsr,Fns,taum,rho0,dl,dl2,dzt,dzw,zw,Cf)
+        h, s2 = boundary_layer_depth(dedt,kN2,db,db2,hmin,H,S,cori,Fsr,Fns,taum,rho0,alpha,dl,dl2,dzw,zw,Cf)
 
         return ( Cf * S * np.abs(cori) * h * H**2 * grad_b 
                 / s2 )

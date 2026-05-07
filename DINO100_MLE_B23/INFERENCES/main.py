@@ -16,7 +16,7 @@ def ocean_info():
     tunnel_config = list()
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
                             'grids' : { 'DINO_Grid' : {'npts' : (62,199), 'halos' : 7, 'bnd' : ('close','close') }  }, \
-                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v','qsr','qns','taum','htau'], 'out' : ['psi_u','psi_v']},
+                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['Hu','Hv','Db_u','Db_v','qsr','qns','taum','htau','alpha'], 'out' : ['psi_u','psi_v']},
                                         {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['en_prod','en_rhs'], 'out' : []}
                                       ] }
                         )
@@ -25,7 +25,7 @@ def ocean_info():
     tunnel_config.append( { 'label' : 'TO_NEMO_METRICS', \
                             'grids' : { 'DINO_Grid' : {'npts' : (62,199), 'halos' : 7, 'bnd' : ('close','close') }  }, \
                             'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['e1u','e2v'], 'out' : []},
-                                        {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['e3t','e3w','depthw'], 'out' : []}
+                                        {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['e3w','depthw'], 'out' : []}
                                       ] }
                         )
                         
@@ -72,7 +72,7 @@ def production():
     # get metrics
     e1u = nemo_metrics.receive('e1u')
     e2v = nemo_metrics.receive('e2v')
-    e3t = nemo_metrics.receive('e3t')
+    # e3t = nemo_metrics.receive('e3t')
     e3w = nemo_metrics.receive('e3w')
     depthw = nemo_metrics.receive('depthw')
 
@@ -83,7 +83,7 @@ def production():
 
     # constants
     omega = 7.292115083046062e-5
-    Lat = nemo_nml.get('rn_lat')
+    Lat, = nemo_nml.get('rn_lat')
     f_cori = 2.0 * omega * sin( Lat * pi / 180.)
     #C_Lfa = Ce / ( 5000.0 * 2.0 * omega * sin( Lat * pi / 180.) )
     rho0 = 1025.
@@ -97,12 +97,12 @@ def production():
         outputs['psi_u'] = mle_stream_func( 
                 db=inputs['Db_u'], hmin=inputs['htau'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fsr=inputs['qsr'], Fns=inputs['qns'], 
                 dedt=inputs['en_rhs'], kN2=inputs['en_prod'], taum=inputs['taum'], rho0=rho0, 
-                db2=inputs['Db_v'], dl2=e2v, dzt=e3t, dzw=e3w, zw=depthw 
+                db2=inputs['Db_v'], dl2=e2v, alpha=['alpha'], dzw=e3w, zw=depthw 
                 )
         outputs['psi_v'] = mle_stream_func( 
                 db=inputs['Db_v'], hmin=inputs['htau'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fsr=inputs['qsr'], Fns=inputs['qns'],
                 dedt=inputs['en_rhs'], kN2=inputs['en_prod'], taum=inputs['taum'], rho0=rho0, 
-                db2=inputs['Db_u'], dl2=e1u, dzt=e3t, dzw=e3w, zw=depthw 
+                db2=inputs['Db_u'], dl2=e1u, alpha=['alpha'], dzw=e3w, zw=depthw 
                 )
         
         return outputs
