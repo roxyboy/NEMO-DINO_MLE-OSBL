@@ -83,7 +83,7 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,dxu,dy
                                          * h * mu[:k] * dzw[:k] 
                                         )
                               )
-                            if 'res0' in locals():
+                            if 'res0' not in locals():
                                 res0 = np.abs(res)
                                 res1 = res0
                                 bld[i,j] = h
@@ -100,7 +100,8 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,dxu,dy
                             else:
                                 bld[i,j] = np.abs(H[i,j])
                                 break
-                        del res0, res1
+                if 'res1' in locals():
+                    del res0, res1
          
         return bld, star2
 
