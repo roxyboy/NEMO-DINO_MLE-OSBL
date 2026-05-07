@@ -89,7 +89,7 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,alpha,
                             if 'res0' not in locals():
                                 res0 = np.abs(res)
                                 res1 = res0
-                                print(res0.shape,res1.shape,h)
+                                # print(res0.shape,res1.shape,h)
                                 bld[i,j] = h
                             else:
                                 if np.abs(res) < res1:
