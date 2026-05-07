@@ -84,6 +84,8 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
       ! send velocities and masks
+      CALL send_to_python( 'e1u', e1u, kt )    ! Send fields to Python models
+      CALL send_to_python( 'e2v', e2v, kt )    ! Send fields to Python models
       CALL send_to_python( 'Hu', Hu, kt )    ! Send fields to Python models
       CALL send_to_python( 'Hv', Hv, kt )    ! Send fields to Python models
       CALL send_to_python( 'Db_u', Db_u, kt )    ! Send fields to Python models
