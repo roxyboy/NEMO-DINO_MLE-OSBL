@@ -16,7 +16,7 @@ MODULE tramle
    USE zdfmxl         ! mixed layer depth
    !
    USE sbc_oce, ONLY  : taum, qsr_tot, qns_tot        ! surface boundary condition: ocean
-   USE eosbn2,  ONLY  : pabT
+   ! USE eosbn2,  ONLY  : pabT
    !
    USE in_out_manager ! I/O manager
    USE iom            ! IOM library
@@ -250,7 +250,7 @@ CONTAINS
             !
          ENDIF
          !                                      !==  External computation of MLE stream function ==!
-         CALL update_from_mle_b23( kt, htau, zhu, zhv, dbu, dbv, qsr_tot, qns_tot, taum, pabT, en_prod, en_rhs )
+         CALL update_from_mle_b23( kt, htau, zhu, zhv, dbu, dbv, qsr_tot, qns_tot, taum, rab_n(:,:,1,jp_tem), en_prod, en_rhs )
          zpsim_u(:,:) = ext_psiu_mle(:,:) * e2u(:,:)    ! replace external stream function with e2u / e1v required for "transport"
          zpsim_v(:,:) = ext_psiv_mle(:,:) * e1v(:,:)
          !

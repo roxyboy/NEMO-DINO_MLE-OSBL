@@ -82,8 +82,8 @@ CONTAINS
       INTEGER, INTENT(in) ::   kt            ! ocean time step
       !INTEGER, INTENT(in) ::   Nbb           ! time index
       REAL(wp), DIMENSION(jpi,jpj) :: htau, Hu, Hv, Db_u, Db_v
-      REAL(wp), DIMENSION(jpi,jpj) :: qsr, qns, taum
-      REAL(wp), DIMENSION(jpi,jpj,jpk) :: alpha, en_prod, en_rhs
+      REAL(wp), DIMENSION(jpi,jpj) :: qsr, qns, taum, alpha
+      REAL(wp), DIMENSION(jpi,jpj,jpk) :: en_prod, en_rhs
       !!----------------------------------------------------------------------
       !
       ! send velocities and masksi
@@ -102,7 +102,7 @@ CONTAINS
       CALL send_to_python( 'taum', taum, kt )    ! Send fields to Python models
       !CALL send_to_python( 'sh2', sh2(:,:,:,Nbb), kt )    ! Send fields to Python models
       !CALL send_to_python( 'avt', avt(:,:,:,Nbb), kt )    ! Send fields to Python models
-      CALL send_to_python( 'alpha', alpha(:,:,1), kt )
+      CALL send_to_python( 'alpha', alpha, kt )
       CALL send_to_python( 'en_prod', en_prod, kt )    ! Send fields to Python models
       !CALL send_to_python( 'dissl', dissl(:,:,:,Nbb), kt )    ! Send fields to Python models
       CALL send_to_python( 'en_rhs', en_rhs, kt )    ! Send fields to Python models

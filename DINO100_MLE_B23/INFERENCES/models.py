@@ -32,9 +32,9 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,alpha,
         # Cf = 0.03
         # rho0 = 1025.
         ustar = np.sqrt( np.abs(taum)/rho0 )
-        print(H.shape, ustar.shape, kN2.shape)
+        # print(H.shape, ustar.shape, kN2.shape)
         mle = ( Cf * S * np.abs(cori) * H**2 * (b_x**2+b_y**2)
-        #        / star2 
+        #        / star2      # star2 is not defined at this stage
               ) * 63/44
 
         grav = 9.807
@@ -62,15 +62,17 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,alpha,
 
                 # kN2 = avt[i,j] * n2[i,j]
 
-                for k in range(1,Nn[2]+1):
-
-                    h = np.sum( dzw[i,j,:k] )
+                if np.abs(H[i,j]) > 0.:
                     
-                    if h >= hmin[i,j]:
+                    for k in range(1,Nn[2]+1):
+
+                        h = np.sum( dzw[i,j,:k] )
+                    
+                        # if h >= hmin[i,j]:
                         mu = np.maximum(np.array([0.,]),
                                 ( (1 - (2*np.abs(zw[i,j,:k])/np.abs(H[i,j]) + 1)**2)
-                                    * (1 + 5/21*(2*np.abs(zw[i,j,:k])/np.abs(H[i,j]) + 1)**2) )
-                               )
+                                  * (1 + 5/21*(2*np.abs(zw[i,j,:k])/np.abs(H[i,j]) + 1)**2) )
+                                       )
 
                         if h < np.abs(H[i,j]):
                             wstar3 = Fb[i,j] * h    # h needs to be found iteratively!
@@ -78,31 +80,34 @@ def boundary_layer_depth(dedt,kN2,dbx,dby,hmin,H,S,cori,Fsr,Fns,taum,rho0,alpha,
                             star2 = ( mstar*ustar[i,j]**3 + nstar*wstar3 )**(2/3)
                             res = ( np.sum( np.minimum(np.array([0.,]), -kN2[i,j,:k]) * dzw[i,j,:k] )
                                 + np.sum( dedt[i,j,:k] * dzw[i,j,:k] )
-                                - mstar*ustar**3
-                                + nstar*np.sum( np.minimum(np.array([0.,]), kN2[:k]) * dzw[i,j,:k] )
+                                - mstar*ustar[i,j]**3
+                                + nstar*np.sum( np.minimum(np.array([0.,]), kN2[i,j,:k]) * dzw[i,j,:k] )
                                 + np.sum( (mle[i,j] / star2) 
                                          * h * mu[:k] * dzw[i,j,:k] 
                                         )
-                              )
+                                  )
                             if 'res0' not in locals():
                                 res0 = np.abs(res)
                                 res1 = res0
+                                print(res0.shape,res1.shape,h)
                                 bld[i,j] = h
                             else:
                                 if np.abs(res) < res1:
                                     res1 = np.abs(res)
                                     bld[i,j] = h
-                            # else:
-                            #     bld[i,j] = h - dzw[k]
-                            #     break
                         else:
-                            if res1 < res0:
-                                break
-                            else:
-                                bld[i,j] = np.abs(H[i,j])
-                                break
-                if 'res1' in locals():
+                            break
+
+                    if res1 < res0:
+                        None
+                    else:
+                        bld[i,j] = np.abs(H[i,j])
+                        break
+                    # if 'res0' in locals():
                     del res0, res1
+
+                else:
+                    bld[i,j] = 0.
          
         return bld, star2
 

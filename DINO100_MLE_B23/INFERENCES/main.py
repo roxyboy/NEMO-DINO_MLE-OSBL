@@ -97,12 +97,12 @@ def production():
         outputs['psi_u'] = mle_stream_func( 
                 db=inputs['Db_u'], hmin=inputs['htau'], H=inputs['Hu'], S=Ds_x, dl=e1u, cori=f_cori, Fsr=inputs['qsr'], Fns=inputs['qns'], 
                 dedt=inputs['en_rhs'], kN2=inputs['en_prod'], taum=inputs['taum'], rho0=rho0, 
-                db2=inputs['Db_v'], dl2=e2v, alpha=['alpha'], dzw=e3w, zw=depthw 
+                db2=inputs['Db_v'], dl2=e2v, alpha=inputs['alpha'], dzw=e3w, zw=depthw 
                 )
         outputs['psi_v'] = mle_stream_func( 
                 db=inputs['Db_v'], hmin=inputs['htau'], H=inputs['Hv'], S=Ds_y, dl=e2v, cori=f_cori, Fsr=inputs['qsr'], Fns=inputs['qns'],
                 dedt=inputs['en_rhs'], kN2=inputs['en_prod'], taum=inputs['taum'], rho0=rho0, 
-                db2=inputs['Db_u'], dl2=e1u, alpha=['alpha'], dzw=e3w, zw=depthw 
+                db2=inputs['Db_u'], dl2=e1u, alpha=inputs['alpha'], dzw=e3w, zw=depthw 
                 )
         
         return outputs
